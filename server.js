@@ -115,5 +115,29 @@ app.get('/tools/schema', (req, res) => {
   ]);
 });
 
+
+app.post('/admin/update-test-email', async (req, res) => {
+  try {
+    const { getDb } = require('./db/connection');
+    const db = await getDb();
+
+    db.run(
+      `UPDATE accounts SET email = ? WHERE account_number = ?`,
+      [req.body.email, '1002']
+    );
+
+    res.json({
+      success: true,
+      message: 'Rahul email updated'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Voice bot tool server listening on :${PORT}`));
