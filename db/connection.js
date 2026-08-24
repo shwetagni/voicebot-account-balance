@@ -6,6 +6,16 @@ const DB_PATH = path.join(__dirname, 'bank.sqlite');
 
 let dbInstance = null;
 
+function getAccountCount(sqlDb) {
+  const result = sqlDb.exec('SELECT COUNT(*) AS count FROM accounts');
+
+  if (!result.length || !result[0].values.length) {
+    return 0;
+  }
+
+  return result[0].values[0][0];
+}
+
 async function getDb() {
   if (dbInstance) return dbInstance;
 
@@ -19,6 +29,7 @@ async function getDb() {
     sqlDb = new SQL.Database();
   }
 
+  // Create tables
   sqlDb.run(`
     CREATE TABLE IF NOT EXISTS accounts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,6 +50,18 @@ async function getDb() {
       authenticated_at TEXT NOT NULL
     );
   `);
+
+  // Seed accounts if database is empty
+  if (getAccountCount(sqlDb) === 0) {
+    sqlDb.run(`
+      INSERT INTO accounts
+        (account_number, name, pin, balance, email, phone, card_number, card_status)
+      VALUES
+        ('1001', 'Asha Rao', '1234', 125430.5, 'asha@example.com', '9000000001', '4111111111111111', 'ACTIVE'),
+        ('1002', 'Rahul Mehta', '1122', 8420, 'rahul@example.com', '9000000002', '4222222222222222', 'ACTIVE'),
+        ('1003', 'Priya Nair', '3344', 998765.1, 'priya@example.com', '9000000003', '4333333333333333', 'ACTIVE')
+    `);
+  }
 
   function persist() {
     fs.writeFileSync(DB_PATH, Buffer.from(sqlDb.export()));
@@ -82,9 +105,17 @@ async function getDb() {
     persist();
   }
 
+  // Save database after table creation/seed
   persist();
 
-  dbInstance = { get, all, run, exec };
+  dbInstance = {
+    get,
+    all,
+    run,
+    exec
+  };
+
+  console.log('Database ready:', DB_PATH);
 
   return dbInstance;
 }
