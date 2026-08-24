@@ -34,6 +34,8 @@ async function sendNotification({ session_id, ticket_number, channel }) {
   }
 
   if (!resend) {
+    console.error('RESEND_API_KEY is missing');
+
     return {
       success: false,
       error: 'EMAIL_NOT_CONFIGURED',
@@ -66,8 +68,7 @@ async function sendNotification({ session_id, ticket_number, channel }) {
     };
   }
 
-  const body = `
-Hello ${account.name},
+  const body = `Hello ${account.name},
 
 Your card has been successfully blocked.
 
@@ -76,10 +77,11 @@ Ticket Number: ${ticket_number}
 If you did not request this card block, please contact customer support immediately.
 
 Thank you,
-Enterprise Bot Banking
-`;
+Enterprise Bot Banking`;
 
   try {
+    console.log(`[EMAIL] Sending to ${account.email}`);
+
     const result = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL,
       to: account.email,
@@ -87,8 +89,10 @@ Enterprise Bot Banking
       text: body
     });
 
+    console.log('RESEND RESULT:', JSON.stringify(result));
+
     if (result.error) {
-      console.error('Resend error:', result.error);
+      console.error('RESEND ERROR:', JSON.stringify(result.error));
 
       return {
         success: false,
@@ -104,12 +108,12 @@ Enterprise Bot Banking
     return {
       success: true,
       channel: 'email',
-      message: 'Email confirmation sent successfully.',
-      ticket_number
+      ticket_number,
+      message: 'Email confirmation sent successfully.'
     };
 
   } catch (err) {
-    console.error('Notification failure:', err);
+    console.error('RESEND EXCEPTION:', err);
 
     return {
       success: false,
