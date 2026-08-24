@@ -1,5 +1,33 @@
 const { getDb } = require('./connection');
 
+//new
+const fs = require("fs");
+const path = require("path");
+const sqlite3 = require("sqlite3").verbose();
+
+const dbDir = path.join(__dirname);
+fs.mkdirSync(dbDir, { recursive: true });
+
+const dbPath = path.join(dbDir, "bank.sqlite");
+
+const db = new sqlite3.Database(dbPath);
+//new
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function main() {
   const db = await getDb();
 
