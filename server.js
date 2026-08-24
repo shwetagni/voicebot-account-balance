@@ -122,13 +122,15 @@ app.post('/admin/update-test-email', async (req, res) => {
     const db = await getDb();
 
     db.run(
-      `UPDATE accounts SET email = ? WHERE account_number = ?`,
+      `UPDATE accounts
+       SET email = ?, card_status = 'ACTIVE', ticket_number = NULL
+       WHERE account_number = ?`,
       [req.body.email, '1002']
     );
 
     res.json({
       success: true,
-      message: 'Rahul email updated'
+      message: 'Rahul email and card status updated'
     });
   } catch (err) {
     console.error(err);
