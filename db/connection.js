@@ -58,7 +58,7 @@ async function getDb() {
         (account_number, name, pin, balance, email, phone, card_number, card_status)
       VALUES
         ('1001', 'Asha Rao', '1234', 125430.5, 'asha@example.com', '9000000001', '4111111111111111', 'ACTIVE'),
-        ('1002', 'Rahul Mehta', '1122', 8420, 'shwetagnikarad@gmail.com', '9000000002', '4222222222222222', 'ACTIVE'),
+        ('1002', 'Rahul Mehta', '1122', 8420, 'rahul.demo@example.co', '9000000002', '4222222222222222', 'ACTIVE'),
         ('1003', 'Priya Nair', '3344', 998765.1, 'priya@example.com', '9000000003', '4333333333333333', 'ACTIVE')
     `);
   }
