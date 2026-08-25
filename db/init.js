@@ -58,12 +58,18 @@ async function main() {
     );
   `);
 
-  const seedOne = (account_number, name, pin, balance, phone, email) => {
+   const seedOne = (account_number, name, pin, balance, phone, email) => {
     const existing = db.get('SELECT account_number FROM accounts WHERE account_number = ?', [account_number]);
     if (!existing) {
       db.run(
         'INSERT INTO accounts (account_number, name, pin, balance, card_status, phone, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [account_number, name, pin, balance, 'active', phone, email]
+      );
+    } else {
+      // Keep seed data in sync on every restart/deploy (e.g. if email changes)
+      db.run(
+        'UPDATE accounts SET name = ?, pin = ?, balance = ?, phone = ?, email = ? WHERE account_number = ?',
+        [name, pin, balance, phone, email, account_number]
       );
     }
   };
