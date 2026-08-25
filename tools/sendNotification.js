@@ -89,10 +89,9 @@ Enterprise Bot Banking`;
       text: body
     });
 
-    console.log('RESEND RESULT:', JSON.stringify(result));
+    
 
     if (result.error) {
-      console.error('RESEND ERROR:', JSON.stringify(result.error));
 
       return {
         success: false,
@@ -113,7 +112,6 @@ Enterprise Bot Banking`;
     };
 
   } catch (err) {
-    console.error('RESEND EXCEPTION:', err);
 
     return {
       success: false,

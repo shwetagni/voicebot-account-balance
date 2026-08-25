@@ -116,30 +116,5 @@ app.get('/tools/schema', (req, res) => {
 });
 
 
-app.post('/admin/update-test-email', async (req, res) => {
-  try {
-    const { getDb } = require('./db/connection');
-    const db = await getDb();
-
-    db.run(
-      `UPDATE accounts
-       SET email = ?, card_status = 'ACTIVE', ticket_number = NULL
-       WHERE account_number = ?`,
-      [req.body.email, '1002']
-    );
-
-    res.json({
-      success: true,
-      message: 'Rahul email and card status updated'
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Voice bot tool server listening on :${PORT}`));
