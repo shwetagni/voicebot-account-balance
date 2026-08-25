@@ -75,7 +75,7 @@ async function main() {
   };
 
   seedOne('1001', 'Asha Rao', '4321', 125430.50, '+919900011001', 'asha.demo@example.com');
-  seedOne('1002', 'Rahul Mehta', '1122', 8420.00, '+919900011002', 'shwetagnikarad@gmail.com');
+  seedOne('1002', 'Rahul Mehta', '1122', 8420.00, '+919900011002', 'rahul.demo@example.co');
   seedOne('1003', 'Priya Nair', '7788', 998765.10, '+919900011003', 'priya.demo@example.com');
 
   console.log('DB initialized and seeded at db/bank.sqlite');
