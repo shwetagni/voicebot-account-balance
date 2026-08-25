@@ -29,6 +29,8 @@ card, and when to notify — nothing is a hardcoded IVR menu.
 | `block_card` | `POST /tools/block_card` | Block the card, write a ticket row, return `ticket_number` |
 | `send_notification` | `POST /tools/send_notification` | Send SMS/email with name + ticket number + confirmation |
 
+> Note: tools are registered in AIDA with a `_snk` suffix (e.g. `authenticate_snk`) to avoid name collisions in the shared demo team.
+
 Full JSON schema for registering these with AIDA: `GET /tools/schema`.
 
 ### Design choices
@@ -42,8 +44,10 @@ Full JSON schema for registering these with AIDA: `GET /tools/schema`.
   balance is revealed," rather than relying on the LLM to behave.
 - **Generic auth errors:** wrong PIN and unknown account return the same
   `AUTH_FAILED` message, to avoid leaking which accounts exist.
-- **SQLite via `better-sqlite3`:** zero external services to stand up in 24
-  hours; trivial to swap for Postgres/Supabase later (see "What I'd improve").
+- - **SQLite via `sql.js`:** chosen over `better-sqlite3` specifically to avoid
+  native compilation (no Python/C++ build tools needed), which makes setup
+  painless on Windows. Zero external services to stand up in 24 hours;
+  trivial to swap for Postgres/Supabase later (see "What I'd improve").
 - **Notification fallback:** if `TWILIO_*` / `SMTP_*` env vars aren't set,
   `send_notification` logs a `[MOCK SMS]` / `[MOCK EMAIL]` line to the
   console instead of failing — so the demo runs end-to-end even without live
@@ -52,23 +56,35 @@ Full JSON schema for registering these with AIDA: `GET /tools/schema`.
 
 ## Setup
 
+## Setup
+
+Local run:
+
 ```bash
 npm install
 cp .env.example .env      # fill in Twilio/SMTP creds if you want real sends
-node db/init.js           # creates + seeds db/bank.db with 3 demo accounts
+node db/init.js           # creates + seeds db/bank.sqlite with 3 demo accounts
 node server.js            # starts the tool server on :3000
 ```
 
-Expose it publicly for AIDA to call (demo used a tunnel):
+## Deployment
 
-```bash
-ngrok http 3000
-```
+The demo runs on **Render** (free tier), giving a stable public HTTPS URL —
+this replaced an initial local-tunnel approach, which proved unreliable
+(random URL changes on restart, intermittent tunnel drops). Deployed URL:
+`https://voicebot-account-balance.onrender.com`.
+
+To redeploy: connect this repo on Render as a Web Service, build command
+`npm install`, start command `npm start` (which runs `db/init.js` then
+`server.js` on every boot, so the DB is always freshly seeded).
 
 Then in AIDA: register the four tools from `GET /tools/schema` (or paste
-`PROMPT.md` + the schema into whatever "Tools/Functions/Actions" section
-AIDA's bot builder provides), pointing each tool's webhook at
-`https://<ngrok-domain>/tools/<name>`.
+`PROMPT.md` + the schema into the "Tool(s)" section of AIDA's bot builder),
+pointing each tool's URL at `https://<your-render-url>/tools/<name>`.
+
+Note: Render's free tier sleeps after 15 minutes of inactivity; the first
+request after sleeping can take 30–60 seconds to respond, so the demo
+video briefly "wakes" the service (via a `/health` check) before the call.
 
 ## Demo accounts
 
@@ -88,3 +104,5 @@ second factor as an alternative auth path, and add structured tracing
 (request IDs correlated across the authenticate → get_balance → block_card →
 notify chain) so a failed call can be debugged end-to-end from logs alone
 rather than by re-reading console output.
+ I'd also move off Render's free tier (or add a keep-alive ping) to eliminate
+the cold-start delay on the first request after idling.
